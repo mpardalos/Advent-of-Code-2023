@@ -1,27 +1,55 @@
-cabal-version:      3.0
+cabal-version:      2.4
 name:               aoc23
 version:            0.1.0.0
--- synopsis:
--- description:
-license:            BSD-3-Clause
-license-file:       LICENSE
 author:             Michalis Pardalos
-maintainer:         me@mpardalos.com
--- copyright:
-category:           Game
-build-type:         Simple
--- extra-source-files:
+maintainer:         m.pardalos@gmail.com
 
-common warnings
-    ghc-options: -Wall
+common opts
+    default-extensions: TypeApplications ViewPatterns GADTs ImportQualifiedPost
+    default-language: Haskell2010
+
+library
+    import: opts
+    build-depends:
+        base
+      , safe
+      , containers
+      , unordered-containers
+      , split
+      , deepseq
+      , bytestring
+      , vector
+      , matrix
+      , optics
+      , optics-th
+      , massiv
+      , attoparsec
+      , hashable
+      , parallel
+    hs-source-dirs: solutions
+    exposed-modules:  Solutions
+    other-modules:
+        Day1
+      , Util
 
 executable aoc23
-    import:           warnings
-    main-is:          Main.hs
-    -- other-modules:
-    -- other-extensions:
+    import: opts
     build-depends:
-        base ^>=4.16.4.0,
-        text
-    hs-source-dirs:   exe
-    default-language: GHC2021
+        base
+      , aoc23
+      , bytestring
+      , clock
+    main-is: Main.hs
+    ghc-options: -threaded -with-rtsopts=-N
+
+benchmark bench
+    import: opts
+    type: exitcode-stdio-1.0
+    build-depends:
+        base
+      , aoc23
+      , criterion
+      , bytestring
+      , containers
+    main-is: Benchmark.hs
+    ghc-options: -threaded -with-rtsopts=-N

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+usage() {
+    echo "Usage: $(basename "$0") <day>"
+}
+
+if [ -z "$1" ]; then
+    usage
+    exit 1
+fi
+
+curl \
+    --cookie "session=$(cat session_cookie)" \
+    https://adventofcode.com/2023/day/$1/input
