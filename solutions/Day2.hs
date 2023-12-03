@@ -6,7 +6,6 @@ import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS
 import Data.Foldable (foldl')
 import Data.Function ((&))
-import Debug.Trace
 
 type Game = [Pull]
 
