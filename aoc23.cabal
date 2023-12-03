@@ -6,7 +6,7 @@ maintainer:         m.pardalos@gmail.com
 
 common opts
     default-extensions: TypeApplications ViewPatterns GADTs ImportQualifiedPost
-    default-language: Haskell2010
+    default-language: GHC2021
 
 library
     import: opts
@@ -30,6 +30,7 @@ library
     exposed-modules:  Solutions
     other-modules:
         Day1
+      , Day2
       , Util
 
 executable aoc23
