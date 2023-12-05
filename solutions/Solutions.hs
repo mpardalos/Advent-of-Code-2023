@@ -4,10 +4,12 @@ module Solutions (DisplaySolution (..), Solution (..), solutions) where
 
 import Control.DeepSeq (NFData)
 import Data.ByteString (ByteString)
+import Data.Int (Int64)
 import Day1 (part1, part2)
 import Day2 (part1, part2)
 import Day3 (part1, part2)
 import Day4 (part1, part2)
+import Day5 (part1, part2)
 
 data Solution where
   MkSolution :: (NFData a, DisplaySolution a) => String -> (ByteString -> a) -> FilePath -> Solution
@@ -16,6 +18,9 @@ class DisplaySolution a where
   displaySolution :: a -> String
 
 instance DisplaySolution Int where
+  displaySolution = show
+
+instance DisplaySolution Int64 where
   displaySolution = show
 
 instance DisplaySolution Double where
@@ -33,5 +38,7 @@ solutions =
     MkSolution "Day 3 part 1" Day3.part1 "day3",
     MkSolution "Day 3 part 2" Day3.part2 "day3",
     MkSolution "Day 4 part 1" Day4.part1 "day4",
-    MkSolution "Day 4 part 2" Day4.part2 "day4"
+    MkSolution "Day 4 part 2" Day4.part2 "day4",
+    MkSolution "Day 5 part 1" Day5.part1 "day5",
+    MkSolution "Day 5 part 2" Day5.part2 "day5"
   ]
