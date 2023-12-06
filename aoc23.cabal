@@ -34,6 +34,7 @@ library
       , Day3
       , Day4
       , Day5
+      , Day6
       , Util
 
 executable aoc23

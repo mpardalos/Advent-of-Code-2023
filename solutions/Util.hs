@@ -2,8 +2,10 @@ module Util where
 
 import Data.Attoparsec.ByteString.Char8
 import Data.ByteString (ByteString)
+import Data.ByteString.Char8 qualified as BS
 import Data.HashSet qualified as HashSet
 import Data.Hashable (Hashable)
+import Data.List (unfoldr)
 import Data.Set qualified as Set
 
 parseOrError :: Parser a -> ByteString -> a
@@ -16,3 +18,6 @@ hashNub = HashSet.toList . HashSet.fromList
 
 ordNub :: Ord a => [a] -> [a]
 ordNub = Set.toList . Set.fromList
+
+readSpacedInts :: ByteString -> [Int]
+readSpacedInts = unfoldr (BS.readInt . BS.dropSpace)
