@@ -3,16 +3,13 @@
 
 module Day5 (part1, part2) where
 
-import Control.Monad (join)
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS
-import Data.Char (isDigit)
 import Data.Function ((&))
 import Data.Int (Int64)
 import Data.List (foldl', unfoldr)
 import Data.Maybe (isJust)
 import Safe (fromJustNote)
-import Debug.Trace (trace)
 
 type CategoryMap = [(Int64, Int64, Int64)]
 
@@ -23,17 +20,7 @@ part1 input =
    in minimum (map applyAllMaps seeds)
 
 part2 :: ByteString -> Int
-part2 input =
-  let (seedRanges, categoryMaps) = parse input
-      seeds = readSeedRanges seedRanges
-      applyAllMaps = foldl' (\f categoryMap -> applyMap categoryMap . f) id categoryMaps
-   in -1
-  where
-    readSeedRanges :: [Int64] -> [Int64]
-    readSeedRanges = fmap concat . unfoldr $ \case
-      (start : range : rest) -> Just ([start .. start + range - 1], rest)
-      (_ : _) -> error "Odd count of numbers in seeds"
-      [] -> Nothing
+part2 _ = -1
 
 applyMap :: CategoryMap -> Int64 -> Int64
 applyMap ((dstStart, srcStart, range) : mapEntries) srcNum =
