@@ -1,3 +1,4 @@
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE FlexibleInstances #-}
 
 module Solutions (DisplaySolution (..), Solution (..), solutions) where
@@ -18,18 +19,20 @@ data Solution where
 
 class DisplaySolution a where
   displaySolution :: a -> String
-
-instance DisplaySolution Int where
+  default displaySolution :: Show a => a -> String
   displaySolution = show
 
-instance DisplaySolution Int64 where
-  displaySolution = show
+instance DisplaySolution Int
 
-instance DisplaySolution Double where
-  displaySolution = show
+instance DisplaySolution Int64
+
+instance DisplaySolution Double
 
 instance DisplaySolution String where
   displaySolution = id
+
+instance DisplaySolution () where
+  displaySolution () = "-"
 
 solutions :: [Solution]
 solutions =

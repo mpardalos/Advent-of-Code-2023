@@ -61,8 +61,8 @@ neighbours (row, column) =
       not (dcolumn == 0 && drow == 0)
   ]
 
-part2 :: ByteString -> Int
-part2 input = 0
+part2 :: ByteString -> ()
+part2 _ = ()
 
 parse :: ByteString -> Grid
 parse = V.fromList . BS.lines

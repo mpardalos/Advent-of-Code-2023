@@ -19,8 +19,8 @@ part1 input =
       applyAllMaps = foldl' (\f categoryMap -> applyMap categoryMap . f) id categoryMaps
    in minimum (map applyAllMaps seeds)
 
-part2 :: ByteString -> Int
-part2 _ = -1
+part2 :: ByteString -> ()
+part2 _ = ()
 
 applyMap :: CategoryMap -> Int64 -> Int64
 applyMap ((dstStart, srcStart, range) : mapEntries) srcNum =
