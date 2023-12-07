@@ -9,6 +9,14 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
+if [[ ! -e session_cookie ]]; then
+    echo 'session_cookie does not exist' >&2
+    exit 1
+fi
+
 curl \
+    --silent \
+    --fail-with-body \
     --cookie "session=$(cat session_cookie)" \
+    -O "data/day$1" \
     https://adventofcode.com/2023/day/$1/input
