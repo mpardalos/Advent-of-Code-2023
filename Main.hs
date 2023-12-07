@@ -13,6 +13,7 @@ import System.Clock
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
 import Text.Printf (printf)
+import Debug.Trace (traceMarkerIO)
 
 titleLength :: Int
 titleLength =
@@ -74,9 +75,11 @@ main = do
     input <- BS.readFile ("data/" <> inputFile)
 
     startTime <- getTime Monotonic
+    traceMarkerIO ("Begin " ++ name)
     answer <-
       evaluate (displaySolution $ solution input)
         `catch` \(e :: SomeException) -> pure (show e)
+    traceMarkerIO ("End " ++ name)
     timeElapsed <- diffTimeSpec startTime <$> getTime Monotonic
 
     printLine name timeElapsed answer
