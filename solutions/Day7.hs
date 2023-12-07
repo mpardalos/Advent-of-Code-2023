@@ -2,8 +2,10 @@ module Day7 (part1, part2) where
 
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS
+import Data.Coerce (coerce)
 import Data.Function (on, (&))
-import Data.List (group, sort)
+import Data.List (group, sort, sortBy)
+import Data.Ord (comparing)
 import Safe (fromJustNote)
 
 data Part1
@@ -14,7 +16,7 @@ data HandBid p = HandBid
   { hand :: !(Hand p),
     bid :: !Int
   }
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq)
 
 newtype Hand p = Hand [Card p]
   deriving (Eq)
@@ -40,13 +42,11 @@ part2 = sumEarnings @Part2 . parse
 
 sumEarnings :: QuestionPart p => [HandBid p] -> Int
 sumEarnings handbids =
-  sum $
-    [ rank * bid
-      | (rank, HandBid {bid}) <-
-          sort handbids
-            & reverse
-            & zip [1 ..]
-    ]
+  sortBy (comparing hand) handbids
+    & reverse
+    & zip [1 ..]
+    & map (\(rank, HandBid {bid}) -> rank * bid)
+    & sum
 
 parse :: ByteString -> [HandBid p]
 parse input =
@@ -61,6 +61,18 @@ parse input =
           _ -> error ("Cannot read line: " ++ show line)
       )
 
+classifyHand :: QuestionPart p => Hand p -> HandType
+classifyHand hand =
+  case groupSizes hand of
+    [5] -> FiveOfAKind
+    [4, 1] -> FourOfAKind
+    [3, 2] -> FullHouse
+    (3 : _) -> ThreeOfAKind
+    [2, 2, 1] -> TwoPair
+    (2 : _) -> OnePair
+    [1, 1, 1, 1, 1] -> HighCard
+    ls -> error ("Invalid hand: " ++ show hand ++ "(" ++ show ls ++ ")")
+
 instance QuestionPart p => Ord (Hand p) where
   compare (Hand l) (Hand r) =
     compare (classifyHand (Hand l)) (classifyHand (Hand r)) <> compare l r
@@ -69,20 +81,16 @@ instance QuestionPart p => Ord (Card p) where
   compare = compare `on` relativeRank
 
 class QuestionPart p where
-  classifyHand :: Hand p -> HandType
+  groupSizes :: Hand p -> [Int]
   relativeRank :: Card p -> Int
 
 instance QuestionPart Part1 where
-  classifyHand (Hand hand) =
-    case reverse . sort . map length . group . sort $ hand of
-      [5] -> FiveOfAKind
-      [4, 1] -> FourOfAKind
-      [3, 2] -> FullHouse
-      (3 : _) -> ThreeOfAKind
-      [2, 2, 1] -> TwoPair
-      (2 : _) -> OnePair
-      [1, 1, 1, 1, 1] -> HighCard
-      ls -> error ("Invalid hand: " ++ show hand ++ "(" ++ show ls ++ ")")
+  groupSizes (Hand cards) =
+    sort cards
+      & group
+      & map length
+      & sort
+      & reverse
 
   relativeRank (Card c) = case c of
     'A' -> 1
@@ -101,23 +109,13 @@ instance QuestionPart Part1 where
     _ -> error ("Invalid card: " ++ show c)
 
 instance QuestionPart Part2 where
-  classifyHand (Hand hand) =
-    let jokers = length . filter (== Card 'J') $ hand
-        rawGroupSizes = reverse . sort . map length . group . sort . filter (/= Card 'J') $ hand
-        groupSizes = case rawGroupSizes of
+  groupSizes (Hand cards) =
+    let jokers = length (filter (== Card 'J') cards)
+        nonJokerCards = filter (/= Card 'J') cards
+        rawGroupSizes = groupSizes @Part1 (coerce (Hand nonJokerCards))
+     in case rawGroupSizes of
           (maxGroup : rest) -> maxGroup + jokers : rest
           [] -> [jokers]
-        handType = case groupSizes of
-          [5] -> FiveOfAKind
-          [4, 1] -> FourOfAKind
-          [3, 2] -> FullHouse
-          (3 : _) -> ThreeOfAKind
-          [2, 2, 1] -> TwoPair
-          (2 : _) -> OnePair
-          [1, 1, 1, 1, 1] -> HighCard
-          ls -> error ("Invalid hand: " ++ show hand ++ "(" ++ show ls ++ ")")
-     in -- in trace (show (Hand hand) ++ ": " ++ show handType) handType
-        handType
 
   relativeRank (Card c) = case c of
     'A' -> 1
