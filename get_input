@@ -18,5 +18,5 @@ curl \
     --silent \
     --fail-with-body \
     --cookie "session=$(cat session_cookie)" \
-    -O "data/day$1" \
+    -o "data/day$1" \
     https://adventofcode.com/2023/day/$1/input
