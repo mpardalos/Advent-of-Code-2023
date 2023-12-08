@@ -2,6 +2,7 @@
 
 module Day8 (part1, part2) where
 
+import Control.Parallel.Strategies (parMap, rseq)
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS
 import Data.Function ((&))
@@ -26,7 +27,7 @@ part2 input =
   let (directions, network) = parse input
    in Map.keys network
         & filter ((== 'A') . BS.last)
-        & map (distanceToFinal ((== 'Z') . BS.last) network directions)
+        & parMap rseq (distanceToFinal ((== 'Z') . BS.last) network directions)
         & map fst
         & foldl1 lcm
 
