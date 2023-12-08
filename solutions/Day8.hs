@@ -4,10 +4,15 @@ module Day8 (part1, part2) where
 
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS
+import Data.List (unfoldr)
 import Data.Map (Map)
 import Data.Map qualified as Map
+import Data.Vector (Vector)
+import Data.Vector qualified as V
 
-type Directions = [Char]
+type Direction = Char
+
+type Directions = [Direction]
 
 type Node = ByteString
 
@@ -19,14 +24,34 @@ part1 input =
 
       go :: (Int, ByteString) -> Directions -> (Int, ByteString)
       go (count, "ZZZ") _ = (count, "ZZZ")
-      go (count, current) ('L': rest) = go (count + 1, fst (network Map.! current)) rest
-      go (count, current) ('R': rest) = go (count + 1, snd (network Map.! current)) rest
+      go (count, current) ('L' : rest) = go (count + 1, fst (network Map.! current)) rest
+      go (count, current) ('R' : rest) = go (count + 1, snd (network Map.! current)) rest
       go _ _ = error "Invalid state"
    in fst $ go (0, "AAA") (cycle directions)
-  where
 
-part2 :: ByteString -> ()
-part2 _ = ()
+part2 :: ByteString -> Int
+part2 input =
+  let (directions, network) = parse input
+
+      starts = V.fromList (filter ((== 'A') . BS.last) (Map.keys network))
+
+      step :: Direction -> Node -> Node
+      step 'L' current =
+        let next = fst (network Map.! current)
+         in if next == current then error "LOOP!" else next
+      step 'R' current =
+        let next = snd (network Map.! current)
+         in if next == current then error "LOOP!" else next
+      step c _ = error ("Invalid direction: " ++ show c)
+
+      isFinal :: Node -> Bool
+      isFinal = (== 'Z') . BS.last
+
+      go :: (Int, Vector Node) -> Directions -> (Int, Vector Node)
+      go (count, current) _ | all isFinal current = (count, current)
+      go (count, current) (dir : rest) = go (count + 1, V.map (step dir) current) rest
+      go _ _ = error "Invalid state"
+   in fst $ go (0, starts) (cycle directions)
 
 parse :: ByteString -> (Directions, Network)
 parse input =
