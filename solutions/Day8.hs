@@ -4,11 +4,9 @@ module Day8 (part1, part2) where
 
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS
-import Data.List (unfoldr)
+import Data.Function ((&))
 import Data.Map (Map)
 import Data.Map qualified as Map
-import Data.Vector (Vector)
-import Data.Vector qualified as V
 
 type Direction = Char
 
@@ -21,37 +19,27 @@ type Network = Map Node (Node, Node)
 part1 :: ByteString -> Int
 part1 input =
   let (directions, network) = parse input
-
-      go :: (Int, ByteString) -> Directions -> (Int, ByteString)
-      go (count, "ZZZ") _ = (count, "ZZZ")
-      go (count, current) ('L' : rest) = go (count + 1, fst (network Map.! current)) rest
-      go (count, current) ('R' : rest) = go (count + 1, snd (network Map.! current)) rest
-      go _ _ = error "Invalid state"
-   in fst $ go (0, "AAA") (cycle directions)
+   in fst $ distanceToFinal (== "ZZZ") network directions "AAA"
 
 part2 :: ByteString -> Int
 part2 input =
   let (directions, network) = parse input
+   in Map.keys network
+        & filter ((== 'A') . BS.last)
+        & map (distanceToFinal ((== 'Z') . BS.last) network directions)
+        & map fst
+        & foldl1 lcm
 
-      starts = V.fromList (filter ((== 'A') . BS.last) (Map.keys network))
-
-      step :: Direction -> Node -> Node
-      step 'L' current =
-        let next = fst (network Map.! current)
-         in if next == current then error "LOOP!" else next
-      step 'R' current =
-        let next = snd (network Map.! current)
-         in if next == current then error "LOOP!" else next
-      step c _ = error ("Invalid direction: " ++ show c)
-
-      isFinal :: Node -> Bool
-      isFinal = (== 'Z') . BS.last
-
-      go :: (Int, Vector Node) -> Directions -> (Int, Vector Node)
-      go (count, current) _ | all isFinal current = (count, current)
-      go (count, current) (dir : rest) = go (count + 1, V.map (step dir) current) rest
-      go _ _ = error "Invalid state"
-   in fst $ go (0, starts) (cycle directions)
+distanceToFinal :: (Node -> Bool) -> Network -> Directions -> Node -> (Int, Node)
+distanceToFinal isFinal network directions start = go (0, start) (cycle directions)
+  where
+    go :: (Int, Node) -> Directions -> (Int, Node)
+    go _ [] = error "Out of directions"
+    go (count, current) (c : rest)
+      | isFinal current = (count, current)
+      | 'L' <- c = go (count + 1, fst (network Map.! current)) rest
+      | 'R' <- c = go (count + 1, snd (network Map.! current)) rest
+      | otherwise = error "Invalid state"
 
 parse :: ByteString -> (Directions, Network)
 parse input =
