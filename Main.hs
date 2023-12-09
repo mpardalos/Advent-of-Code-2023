@@ -4,16 +4,16 @@
 
 module Main where
 
-import Control.Exception (SomeException, catch, evaluate)
+import Control.Exception (SomeException, catch, evaluate, try)
 import Control.Monad (forM_)
 import Data.ByteString.Char8 qualified as BS
 import Data.List (isInfixOf)
+import Debug.Trace (traceMarkerIO)
 import Solutions (DisplaySolution (displaySolution), Solution (..), solutions)
 import System.Clock
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
 import Text.Printf (printf)
-import Debug.Trace (traceMarkerIO)
 
 titleLength :: Int
 titleLength =
@@ -54,6 +54,7 @@ printLine name time answer =
 
     formattedTime :: String
     formattedTime
+      | timeNanos == 0 = ""
       | timeNanos < 1e3 = printf "%d ns" timeNanos
       | timeNanos < 1e6 = printf "%d μs" (timeNanos `div` 1e3)
       | timeNanos < 1e9 = printf "%d ms" (timeNanos `div` 1e6)
@@ -72,15 +73,16 @@ main = do
 
   printTableAnchor True
   forM_ filteredSolutions $ \(MkSolution name solution inputFile) -> do
-    input <- BS.readFile ("data/" <> inputFile)
-
-    startTime <- getTime Monotonic
-    traceMarkerIO ("Begin " ++ name)
-    answer <-
-      evaluate (displaySolution $ solution input)
-        `catch` \(e :: SomeException) -> pure (show e)
-    traceMarkerIO ("End " ++ name)
-    timeElapsed <- diffTimeSpec startTime <$> getTime Monotonic
-
-    printLine name timeElapsed answer
+    try (BS.readFile ("data/" <> inputFile)) >>= \case
+      Left (_ :: IOError) ->
+        printLine name 0 ""
+      Right input -> do
+        startTime <- getTime Monotonic
+        traceMarkerIO ("Begin " ++ name)
+        answer <-
+          evaluate (displaySolution $ solution input)
+            `catch` \(e :: SomeException) -> pure (show e)
+        traceMarkerIO ("End " ++ name)
+        timeElapsed <- diffTimeSpec startTime <$> getTime Monotonic
+        printLine name timeElapsed answer
   printTableAnchor False
