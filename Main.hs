@@ -4,7 +4,7 @@
 
 module Main where
 
-import Control.Exception (SomeException, catch, evaluate, try)
+import Control.Exception (SomeException, evaluate, try)
 import Control.Monad (forM_)
 import Data.ByteString.Char8 qualified as BS
 import Data.List (isInfixOf)
@@ -80,9 +80,12 @@ main = do
         startTime <- getTime Monotonic
         traceMarkerIO ("Begin " ++ name)
         answer <-
-          evaluate (displaySolution $ solution input)
-            `catch` \(e :: SomeException) -> pure (show e)
+          try (evaluate (solution input)) >>= \case
+            Left (e :: SomeException) -> pure (Just (show e))
+            Right v -> pure (displaySolution v)
         traceMarkerIO ("End " ++ name)
         timeElapsed <- diffTimeSpec startTime <$> getTime Monotonic
-        printLine name timeElapsed answer
+        case answer of
+          Nothing -> printLine name 0 ""
+          Just s -> printLine name timeElapsed s
   printTableAnchor False

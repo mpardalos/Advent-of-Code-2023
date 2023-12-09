@@ -36,9 +36,9 @@ data Solution where
   MkSolution :: (NFData a, DisplaySolution a) => String -> (ByteString -> a) -> FilePath -> Solution
 
 class DisplaySolution a where
-  displaySolution :: a -> String
-  default displaySolution :: Show a => a -> String
-  displaySolution = show
+  displaySolution :: a -> Maybe String
+  default displaySolution :: Show a => a -> Maybe String
+  displaySolution = Just . show
 
 instance DisplaySolution Int
 
@@ -47,10 +47,10 @@ instance DisplaySolution Int64
 instance DisplaySolution Double
 
 instance DisplaySolution String where
-  displaySolution = id
+  displaySolution = Just . id
 
 instance DisplaySolution () where
-  displaySolution () = "-"
+  displaySolution () = Nothing
 
 solutions :: [Solution]
 solutions =
