@@ -5,7 +5,7 @@ author:             Michalis Pardalos
 maintainer:         m.pardalos@gmail.com
 
 common opts
-    default-extensions: TypeApplications ViewPatterns GADTs ImportQualifiedPost
+    default-extensions: TypeApplications ViewPatterns GADTs ImportQualifiedPost OverloadedRecordDot
     default-language: GHC2021
 
 library
@@ -63,6 +63,9 @@ executable aoc23
       , aoc23
       , bytestring
       , clock
+      , http-types
+      , http-conduit
+      , time
     main-is: Main.hs
     ghc-options: -threaded -with-rtsopts=-N
 
