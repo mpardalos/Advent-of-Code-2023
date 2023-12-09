@@ -9,7 +9,7 @@ import Control.Monad (forM, forM_)
 import Data.ByteString.Char8 qualified as BS
 import Data.List (isInfixOf)
 import Debug.Trace (traceMarkerIO)
-import Solutions (Solution (..), displayAnswer, isSolvedAnswer, solutions)
+import Solutions (Solution (..), displayAnswer, inputFileName, isSolvedAnswer, problemName, solutions)
 import System.Clock
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
@@ -17,10 +17,7 @@ import Text.Printf (printf)
 
 titleLength :: Int
 titleLength =
-  maximum
-    [ length name
-      | MkSolution name _ _ <- solutions
-    ]
+  maximum (map (length . problemName) solutions)
 
 data AnchorType
   = Top
@@ -78,14 +75,16 @@ main = do
   filterFun <-
     getArgs >>= \case
       [] -> return (const True)
-      [filterString] -> return $ \(MkSolution name _ _) -> filterString `isInfixOf` name
+      [filterString] -> return $ \solution -> filterString `isInfixOf` (problemName solution)
       _ -> putStrLn "Too many arguments" >> exitFailure
 
   let filteredSolutions = filter filterFun solutions
 
   printTableAnchor Top
-  times <- forM filteredSolutions $ \(MkSolution name solution inputFile) -> do
-    try (BS.readFile ("data/" <> inputFile)) >>= \case
+  times <- forM filteredSolutions $ \solution@MkSolution {solve} -> do
+    let name = problemName solution
+
+    try (BS.readFile ("data/" <> inputFileName solution)) >>= \case
       Left (_ :: IOError) -> do
         printLine name 0 ""
         return 0
@@ -93,7 +92,7 @@ main = do
         startTime <- getTime Monotonic
         traceMarkerIO ("Begin " ++ name)
         answer <-
-          try (evaluate (solution input)) >>= \case
+          try (evaluate (solve input)) >>= \case
             Left (e :: SomeException) -> pure (Just (show e))
             Right v
               | isSolvedAnswer v -> pure (Just (displayAnswer v))
