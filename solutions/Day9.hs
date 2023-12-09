@@ -4,6 +4,7 @@ module Day9 (part1, part2) where
 
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS
+import Data.Foldable (foldl')
 import Data.Function ((&))
 import Util (pairs, readSpacedInts)
 
@@ -16,11 +17,11 @@ part1 input =
     & sum
 
 predict :: Sequence -> Int
-predict topSequence = go (differentialChain topSequence)
-  where
-    go [] = 0
-    go [s] = head s -- Last sequence in the chain, should be all equal, so no need to traverse to the end.
-    go (s : diffs) = last s + go diffs
+predict topSequence =
+  foldl'
+    (\prediction s -> last s + prediction)
+    0
+    (differentialChain topSequence)
 
 part2 :: ByteString -> Int
 part2 input =
@@ -29,11 +30,11 @@ part2 input =
     & sum
 
 backPredict :: Sequence -> Int
-backPredict topSequence = go (differentialChain topSequence)
-  where
-    go [] = 0
-    go [s] = head s
-    go (s : diffs) = head s - go diffs
+backPredict topSequence =
+  foldl'
+    (\backPrediction s -> head s - backPrediction)
+    0
+    (differentialChain topSequence)
 
 differentialChain :: Sequence -> [Sequence]
 differentialChain = takeWhile (any (/= 0)) . iterate differentiate
