@@ -5,7 +5,7 @@
 module Main where
 
 import Control.Exception (SomeException, evaluate, try)
-import Control.Monad (forM_)
+import Control.Monad (forM, forM_)
 import Data.ByteString.Char8 qualified as BS
 import Data.List (isInfixOf)
 import Debug.Trace (traceMarkerIO)
@@ -22,16 +22,29 @@ titleLength =
       | MkSolution name _ _ <- solutions
     ]
 
-printTableAnchor :: Bool -> IO ()
-printTableAnchor top =
+data AnchorType
+  = Top
+  | Middle
+  | Bottom
+
+printTableAnchor :: AnchorType -> IO ()
+printTableAnchor anchorType =
   printf
     "%s─%s─%s────────%s───────────\n"
-    (if top then "┌" else "└")
+    startMarker
     (replicate titleLength '─')
-    lineT
-    lineT
+    middleMarker
+    middleMarker
   where
-    lineT = if top then "┬" else "┴"
+    startMarker = case anchorType of
+      Top -> "┌"
+      Middle -> "├"
+      Bottom -> "└"
+
+    middleMarker = case anchorType of
+      Top -> "┬"
+      Middle -> "┼"
+      Bottom -> "┴"
 
 printLine :: String -> TimeSpec -> String -> IO ()
 printLine name time answer =
@@ -71,11 +84,12 @@ main = do
 
   let filteredSolutions = filterFun solutions
 
-  printTableAnchor True
-  forM_ filteredSolutions $ \(MkSolution name solution inputFile) -> do
+  printTableAnchor Top
+  times <- forM filteredSolutions $ \(MkSolution name solution inputFile) -> do
     try (BS.readFile ("data/" <> inputFile)) >>= \case
-      Left (_ :: IOError) ->
+      Left (_ :: IOError) -> do
         printLine name 0 ""
+        return 0
       Right input -> do
         startTime <- getTime Monotonic
         traceMarkerIO ("Begin " ++ name)
@@ -88,6 +102,12 @@ main = do
         traceMarkerIO ("End " ++ name)
         timeElapsed <- diffTimeSpec startTime <$> getTime Monotonic
         case answer of
-          Nothing -> printLine name 0 ""
-          Just s -> printLine name timeElapsed s
-  printTableAnchor False
+          Nothing -> do
+            printLine name 0 ""
+            return 0
+          Just s -> do
+            printLine name timeElapsed s
+            return timeElapsed
+  printTableAnchor Middle
+  printLine "Total time" (sum times) ""
+  printTableAnchor Bottom
