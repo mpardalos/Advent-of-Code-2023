@@ -23,6 +23,7 @@ import Network.HTTP.Simple
 import Network.HTTP.Types
 import Solutions (Solution (..), displayAnswer, inputFileName, isSolvedAnswer, problemName, solutions)
 import System.Clock
+import System.Directory
 import System.Environment (getArgs, getEnv)
 import System.Exit (exitFailure)
 import System.IO
@@ -138,6 +139,7 @@ getInput :: Int -> IO ByteString
 getInput day =
   BS.readFile inputPath `catch` \(_ :: IOError) -> do
     downloadedInput <- downloadInput day
+    createDirectoryIfMissing False "data/"
     BS.writeFile inputPath downloadedInput
     -- Read the file to make sure that we get any possible issues with the file now, and not the next time it is read.
     BS.readFile inputPath

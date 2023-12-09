@@ -66,6 +66,7 @@ executable aoc23
       , http-types
       , http-conduit
       , time
+      , directory
     main-is: Main.hs
     ghc-options: -threaded -with-rtsopts=-N
 
