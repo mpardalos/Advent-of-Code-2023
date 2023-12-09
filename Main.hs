@@ -37,9 +37,9 @@ printTableAnchor anchorType =
     middleMarker
   where
     startMarker = case anchorType of
-      Top -> "┌"
+      Top -> "╭"
       Middle -> "├"
-      Bottom -> "└"
+      Bottom -> "╰"
 
     middleMarker = case anchorType of
       Top -> "┬"
