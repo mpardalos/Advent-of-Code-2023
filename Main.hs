@@ -77,12 +77,11 @@ main :: IO ()
 main = do
   filterFun <-
     getArgs >>= \case
-      [] -> return id
-      [filterString] -> return $ filter $ \(MkSolution name _ _) ->
-        filterString `isInfixOf` name
+      [] -> return (const True)
+      [filterString] -> return $ \(MkSolution name _ _) -> filterString `isInfixOf` name
       _ -> putStrLn "Too many arguments" >> exitFailure
 
-  let filteredSolutions = filterFun solutions
+  let filteredSolutions = filter filterFun solutions
 
   printTableAnchor Top
   times <- forM filteredSolutions $ \(MkSolution name solution inputFile) -> do
