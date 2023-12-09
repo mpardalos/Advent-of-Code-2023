@@ -21,7 +21,7 @@ import Data.Time.Clock
 import Debug.Trace (traceMarkerIO)
 import Network.HTTP.Simple
 import Network.HTTP.Types
-import Solutions (Solution (..), displayAnswer, inputFileName, isSolvedAnswer, problemName, solutions)
+import Solutions (Solution (..), displayAnswer, isSolvedAnswer, problemName, solutions)
 import System.Clock
 import System.Directory
 import System.Environment (getArgs, getEnv)
@@ -86,10 +86,6 @@ printLine name time answer =
       | timeNanos < 1e9 = printf "%d ms" (timeNanos `div` 1e6)
       | otherwise = printf "%d  s" (timeNanos `div` 1e9)
 
-newtype HTTPError = HTTPError {status :: Status}
-  deriving (Show)
-  deriving anyclass (Exception)
-
 data AOCError = InputNotOutYet
   deriving (Show)
   deriving anyclass (Exception)
@@ -129,8 +125,14 @@ downloadInput inputDay = do
 
   response <- httpBS request
 
-  when (statusCode (getResponseStatus response) /= 200) $
-    throwIO (HTTPError (getResponseStatus response))
+  let status = getResponseStatus response
+  when (statusCode status /= 200) $
+    ioError $
+      userError $
+        "  Unexpected HTTP Response: "
+          <> show (statusCode status)
+          <> " "
+          <> show (BS.unpack $ statusMessage status)
 
   return (getResponseBody response)
 
