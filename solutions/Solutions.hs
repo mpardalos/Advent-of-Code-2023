@@ -1,6 +1,3 @@
-{-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE FlexibleInstances #-}
-
 module Solutions
   ( Solution (..),
     displayAnswer,
