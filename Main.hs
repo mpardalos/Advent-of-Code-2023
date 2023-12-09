@@ -9,7 +9,7 @@ import Control.Monad (forM_)
 import Data.ByteString.Char8 qualified as BS
 import Data.List (isInfixOf)
 import Debug.Trace (traceMarkerIO)
-import Solutions (DisplaySolution (displaySolution), Solution (..), solutions)
+import Solutions (Solution (..), displayAnswer, isSolvedAnswer, solutions)
 import System.Clock
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
@@ -82,7 +82,9 @@ main = do
         answer <-
           try (evaluate (solution input)) >>= \case
             Left (e :: SomeException) -> pure (Just (show e))
-            Right v -> pure (displaySolution v)
+            Right v
+              | isSolvedAnswer v -> pure (Just (displayAnswer v))
+              | otherwise -> pure Nothing
         traceMarkerIO ("End " ++ name)
         timeElapsed <- diffTimeSpec startTime <$> getTime Monotonic
         case answer of

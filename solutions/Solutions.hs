@@ -1,11 +1,11 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Solutions (DisplaySolution (..), Solution (..), solutions) where
+module Solutions (Solution (..), solutions, displayAnswer, isSolved, isSolvedAnswer) where
 
 import Control.DeepSeq (NFData)
 import Data.ByteString (ByteString)
-import Data.Int (Int64)
+import Data.Typeable (Typeable, cast)
 import Day1 (part1, part2)
 import Day10 (part1, part2)
 import Day11 (part1, part2)
@@ -33,24 +33,20 @@ import Day8 (part1, part2)
 import Day9 (part1, part2)
 
 data Solution where
-  MkSolution :: (NFData a, DisplaySolution a) => String -> (ByteString -> a) -> FilePath -> Solution
+  MkSolution :: (NFData a, Show a, Typeable a) => String -> (ByteString -> a) -> FilePath -> Solution
 
-class DisplaySolution a where
-  displaySolution :: a -> Maybe String
-  default displaySolution :: Show a => a -> Maybe String
-  displaySolution = Just . show
+displayAnswer :: (Show a, Typeable a) => a -> String
+displayAnswer (cast -> Just ()) = ""
+displayAnswer x = show x
 
-instance DisplaySolution Int
+isSolvedAnswer :: forall a. Typeable a => a -> Bool
+isSolvedAnswer (cast -> Just ()) = False
+isSolvedAnswer _ = True
 
-instance DisplaySolution Int64
-
-instance DisplaySolution Double
-
-instance DisplaySolution String where
-  displaySolution = Just . id
-
-instance DisplaySolution () where
-  displaySolution () = Nothing
+isSolved :: Solution -> Bool
+isSolved (MkSolution _ f _)
+  | Just (_ :: ByteString -> ()) <- cast f = False
+  | otherwise = True
 
 solutions :: [Solution]
 solutions =
