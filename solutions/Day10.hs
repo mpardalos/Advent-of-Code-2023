@@ -105,7 +105,7 @@ fancyDraw input =
     . snd
     $ BS.mapAccumL step (0, 0) input
   where
-    loopPositions = getLoop (parse input)
+    loopPositions = Set.fromList $ getLoop $ parse input
 
     step :: Position -> Char -> (Position, Char)
     step pos@(row, col) c
