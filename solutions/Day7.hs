@@ -86,7 +86,7 @@ class QuestionPart p where
 
 instance QuestionPart Part1 where
   groupSizes (Hand cards) =
-    sort cards
+    sort cards -- Profiling indicates this sort is the most expensive part of the code (~10% of time and ~80% of allocs)
       & group
       & map length
       & sort
