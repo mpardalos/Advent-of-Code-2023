@@ -7,6 +7,8 @@ import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
+import Data.Set qualified as Set
+import Util (pairs)
 
 type Position = (Int, Int)
 
@@ -15,14 +17,24 @@ type Pipe = Char
 type Grid a = Map Position a
 
 part1 :: ByteString -> Int
-part1 input = length (traverseFromTo grid startPos startDir) `div` 2
+part1 input = length (getLoop (parse input)) `div` 2
+
+part2 :: ByteString -> Int
+part2 input =
+  let grid = parse input
+      loop = getLoop grid
+      vertices = [pos | pos <- loop, grid Map.! pos `elem` "SLJ7F"]
+      -- Uhh... idk what is happening here. Something about the Shoelace theorem and Pick's theorem.
+      -- Idk, look it up. I swear it works.
+      shoelace = abs (sum [x1 * y2 - x2 * y1 | ((y1, x1), (y2, x2)) <- pairs (vertices ++ [head vertices])] `div` 2)
+      picks = length loop `div` 2
+   in shoelace - picks + 1
+
+getLoop :: Grid Pipe -> [Position]
+getLoop grid = traverseFromTo grid startPos startDir
   where
-    grid = parse input
     startPos = findStartPos grid
     startDir = head $ directionsFrom grid startPos
-
-part2 :: ByteString -> ()
-part2 _ = ()
 
 findStartPos :: Grid Pipe -> Position
 findStartPos = Map.foldlWithKey (\acc pos c -> if c == 'S' then pos else acc) (-1, -1)
@@ -49,12 +61,14 @@ traverseFromTo grid prevPos@(prevRow, prevCol) pos@(row, col) = case grid Map.! 
     down = (row + 1, col)
     left = (row, col - 1)
 
+-- | Get possible directions from a given position.  looks at neighbours to
+-- determine what is possible, so it also works with the 'S' pipe
 directionsFrom :: Grid Pipe -> Position -> [Position]
 directionsFrom grid (startRow, startCol) =
   map snd . filter fst $
-    [ (startUp, (startRow - 1, startCol)),
-      (startRight, (startRow, startCol + 1)),
+    [ (startRight, (startRow, startCol + 1)),
       (startDown, (startRow + 1, startCol)),
+      (startUp, (startRow - 1, startCol)),
       (startLeft, (startRow, startCol - 1))
     ]
   where
@@ -91,10 +105,7 @@ fancyDraw input =
     . snd
     $ BS.mapAccumL step (0, 0) input
   where
-    grid = parse input
-    start = findStartPos grid
-    startDir = head $ directionsFrom grid start
-    loopPositions = traverseFromTo grid start startDir
+    loopPositions = getLoop (parse input)
 
     step :: Position -> Char -> (Position, Char)
     step pos@(row, col) c
