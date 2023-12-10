@@ -7,6 +7,7 @@ import Data.HashSet qualified as HashSet
 import Data.Hashable (Hashable)
 import Data.List (unfoldr)
 import Data.Set qualified as Set
+import Debug.Trace (trace)
 
 parseOrError :: Parser a -> ByteString -> a
 parseOrError parser input = case parseOnly parser input of
@@ -22,6 +23,9 @@ ordNub = Set.toList . Set.fromList
 readSpacedInts :: ByteString -> [Int]
 readSpacedInts = unfoldr (BS.readInt . BS.dropSpace)
 
-pairs :: [a] -> [(a,a)]
-pairs (a:b:rest) = (a,b):pairs (b:rest)
+pairs :: [a] -> [(a, a)]
+pairs (a : b : rest) = (a, b) : pairs (b : rest)
 pairs _ = []
+
+traceShowIdLabelled :: Show a => String -> a -> a
+traceShowIdLabelled l x = trace (l ++ ": " ++ show x) x
