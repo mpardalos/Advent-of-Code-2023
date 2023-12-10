@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
-module Day10 (part1, part2) where
+module Day10 (part1, part2, fancyDraw) where
 
 import Control.Parallel.Strategies (parMap, rseq)
 import Data.ByteString (ByteString)
@@ -83,3 +83,32 @@ parse = Map.unions . parMap rseq (uncurry parseLine) . zip [0 ..] . BS.lines
     go row (!grid, !col) c
       | c `elem` "|-LJ7F.S" = (Map.insert (row, col) c grid, col + 1)
       | otherwise = error ("Invalid char: " ++ show c)
+
+fancyDraw :: ByteString -> String
+fancyDraw input =
+  map fancify
+    . BS.unpack
+    . snd
+    $ BS.mapAccumL step (0, 0) input
+  where
+    grid = parse input
+    start = findStartPos grid
+    startDir = head $ directionsFrom grid start
+    loopPositions = traverseFromTo grid start startDir
+
+    step :: Position -> Char -> (Position, Char)
+    step pos@(row, col) c
+      | '\n' <- c = ((row + 1, 0), '\n')
+      | pos `elem` loopPositions = ((row, col + 1), c)
+      | '.' <- c = ((row, col + 1), c)
+      | otherwise = ((row, col + 1), ' ')
+
+    fancify '|' = '│'
+    fancify '-' = '─'
+    fancify 'L' = '╰'
+    fancify 'J' = '╯'
+    fancify '7' = '╮'
+    fancify 'F' = '╭'
+    fancify '.' = '◯'
+    fancify 'S' = 'S'
+    fancify c = c
