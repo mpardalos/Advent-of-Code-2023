@@ -100,8 +100,7 @@ fancyDraw input =
     step pos@(row, col) c
       | '\n' <- c = ((row + 1, 0), '\n')
       | pos `elem` loopPositions = ((row, col + 1), c)
-      | '.' <- c = ((row, col + 1), c)
-      | otherwise = ((row, col + 1), ' ')
+      | otherwise = ((row, col + 1), fancify '.')
 
     fancify '|' = '│'
     fancify '-' = '─'
@@ -109,6 +108,6 @@ fancyDraw input =
     fancify 'J' = '╯'
     fancify '7' = '╮'
     fancify 'F' = '╭'
-    fancify '.' = '◯'
+    fancify '.' = 'O'
     fancify 'S' = 'S'
     fancify c = c
