@@ -6,7 +6,7 @@ import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS
 import Data.Foldable (foldl')
 import Data.Function ((&))
-import Util (pairs, readSpacedInts)
+import Util (pairwise, readSpacedInts)
 
 type Sequence = [Int]
 
@@ -40,7 +40,7 @@ differentialChain :: Sequence -> [Sequence]
 differentialChain = takeWhile (any (/= 0)) . iterate differentiate
 
 differentiate :: Sequence -> Sequence
-differentiate = map (uncurry (flip (-))) . pairs
+differentiate = map (uncurry (flip (-))) . pairwise
 
 parse :: ByteString -> [Sequence]
 parse input = map readSpacedInts $ BS.lines input

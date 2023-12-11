@@ -8,7 +8,7 @@ import Data.ByteString.Char8 qualified as BS
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
-import Util (pairs)
+import Util (pairwise)
 
 type Position = (Int, Int)
 
@@ -26,7 +26,7 @@ part2 input =
       vertices = [pos | pos <- loop, grid Map.! pos `elem` "SLJ7F"]
       -- Uhh... idk what is happening here. Something about the Shoelace theorem and Pick's theorem.
       -- Idk, look it up. I swear it works.
-      shoelace = abs (sum [x1 * y2 - x2 * y1 | ((y1, x1), (y2, x2)) <- pairs (vertices ++ [head vertices])] `div` 2)
+      shoelace = abs (sum [x1 * y2 - x2 * y1 | ((y1, x1), (y2, x2)) <- pairwise (vertices ++ [head vertices])] `div` 2)
       picks = length loop `div` 2
    in shoelace - picks + 1
 

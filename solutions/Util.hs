@@ -23,9 +23,9 @@ ordNub = Set.toList . Set.fromList
 readSpacedInts :: ByteString -> [Int]
 readSpacedInts = unfoldr (BS.readInt . BS.dropSpace)
 
-pairs :: [a] -> [(a, a)]
-pairs (a : b : rest) = (a, b) : pairs (b : rest)
-pairs _ = []
+pairwise :: [a] -> [(a, a)]
+pairwise (a : b : rest) = (a, b) : pairwise (b : rest)
+pairwise _ = []
 
 uniquePairs :: [a] -> [(a, a)]
 uniquePairs [] = []
