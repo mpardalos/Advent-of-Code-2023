@@ -27,12 +27,14 @@ pairwise :: [a] -> [(a, a)]
 pairwise (a : b : rest) = (a, b) : pairwise (b : rest)
 pairwise _ = []
 
+-- | Get all unordered pairs of elements from a list.
+-- The cartesian product of the list with itself
 uniquePairs :: [a] -> [(a, a)]
 uniquePairs [] = []
 uniquePairs (x : xs) = [(x, y) | y <- xs] ++ uniquePairs xs
 
-traceShowIdLabelled :: Show a => String -> a -> a
-traceShowIdLabelled l x = trace (l ++ ": " ++ show x) x
-
 manhattanDistance :: Num a => (a, a) -> (a, a) -> a
 manhattanDistance (row1, col1) (row2, col2) = abs (row2 - row1) + abs (col2 - col1)
+
+traceShowIdLabelled :: Show a => String -> a -> a
+traceShowIdLabelled l x = trace (l ++ ": " ++ show x) x
