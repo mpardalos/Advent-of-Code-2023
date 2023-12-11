@@ -31,8 +31,8 @@ part2 input =
 
 backPredict :: Sequence -> Int
 backPredict topSequence =
-  foldl'
-    (\backPrediction s -> head s - backPrediction)
+  foldr
+    (\s backPrediction -> head s - backPrediction)
     0
     (differentialChain topSequence)
 
