@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 module Day12 (part1, part2) where
 
@@ -65,6 +67,7 @@ example1 =
       ".###.##....# 3,2,1"
     ]
 
+example1p2 :: [([Char], [Int])]
 example1p2 = map part2ify example1
 
 example2 :: [([Char], [Int])]
@@ -78,4 +81,5 @@ example2 =
       "?###???????? 3,2,1"
     ]
 
+example2p2 :: [([Char], [Int])]
 example2p2 = map part2ify example2
