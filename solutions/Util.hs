@@ -20,6 +20,9 @@ hashNub = HashSet.toList . HashSet.fromList
 ordNub :: Ord a => [a] -> [a]
 ordNub = Set.toList . Set.fromList
 
+readIntsSepBy :: Char -> ByteString -> [Int]
+readIntsSepBy c = unfoldr (BS.readInt . (BS.dropWhile (== c)))
+
 readSpacedInts :: ByteString -> [Int]
 readSpacedInts = unfoldr (BS.readInt . BS.dropSpace)
 
