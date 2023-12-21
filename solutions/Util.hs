@@ -3,7 +3,7 @@
 
 module Util where
 
-import Data.Attoparsec.ByteString.Char8
+import Data.Attoparsec.ByteString.Char8 (Parser, parseOnly)
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS
 import Data.Coerce (coerce)
@@ -16,6 +16,14 @@ import Data.Set qualified as Set
 import Data.Vector (Vector)
 import Data.Vector qualified as V
 import Debug.Trace (trace)
+import GHC.IO.Handle (hPutStr)
+import System.Process
+  ( CreateProcess (std_in),
+    ProcessHandle,
+    StdStream (CreatePipe),
+    createProcess,
+    proc,
+  )
 
 parseOrError :: Parser a -> ByteString -> a
 parseOrError parser input = case parseOnly parser input of
@@ -135,3 +143,9 @@ parseSparseGrid isEmpty input =
       '\n' -> go m (row + 1, 0) cs
       _ | isEmpty c -> go m (row, col + 1) cs
       _ -> go (Map.insert (row, col) c m) (row, col + 1) cs
+
+graphvizView :: String -> IO ProcessHandle
+graphvizView dot = do
+  (Just hGvIn, _, _, gvProcess) <- createProcess $ (proc "dot" ["-Tx11"]) {std_in = CreatePipe}
+  hPutStr hGvIn dot
+  return gvProcess
