@@ -17,11 +17,9 @@ import Data.Map (Map)
 import Data.Map qualified as Map
 import Data.Sequence (Seq ((:<|)), (><))
 import Data.Sequence qualified as Seq
-import Debug.Trace (trace, traceShow)
 import GHC.Generics (Generic)
-import System.IO.Unsafe (unsafePerformIO)
 import Text.Printf (printf)
-import Util (graphvizView, traceShowIdLabelled)
+import Util (graphvizView)
 
 default (String)
 
@@ -31,8 +29,8 @@ part1 input =
       buttonSignalCounts =
         unfoldr
           ( \gr ->
-              let (counts, gr') = runButton gr
-               in Just (counts, gr')
+              let (signals, gr') = runButton gr
+               in Just (countSignals signals, gr')
           )
           graph
       cumulativeSignalCounts :: [(Int, Int)] =
@@ -43,6 +41,16 @@ part1 input =
       (lastLow, lastHigh) = cumulativeSignalCounts !! 1000
    in lastLow * lastHigh
 
+countSignals :: [Signal] -> (Int, Int)
+countSignals =
+  foldr
+    ( \Signal {level} (lows, highs) ->
+        if level
+          then (lows, highs + 1)
+          else (lows + 1, highs)
+    )
+    (0, 0)
+
 -- part1 :: ByteString -> Int
 -- part1 input =
 --   let graph = parse input
@@ -52,25 +60,24 @@ part1 input =
 part2 :: ByteString -> ()
 part2 _ = ()
 
-buttonUntilReset :: NodeGraph -> (Int, (Int, Int))
-buttonUntilReset initGraph = go 0 (0, 0) initGraph
-  where
-    go iters (lowCount, highCount) gr =
-      let ((lowCountAdd, highCountAdd), gr') = runButton gr
-          (lowCount', highCount') = (lowCount + lowCountAdd, highCount + highCountAdd)
-          iters' = iters + 1
-       in if all nodeIsReset gr'
-            then (iters', (lowCount', highCount'))
-            else go iters' (lowCount', highCount') gr'
+-- buttonUntilReset :: NodeGraph -> (Int, (Int, Int))
+-- buttonUntilReset initGraph = go 0 (0, 0) initGraph
+--   where
+--     go iters (lowCount, highCount) gr =
+--       let ((lowCountAdd, highCountAdd), gr') = runButton gr
+--           (lowCount', highCount') = (lowCount + lowCountAdd, highCount + highCountAdd)
+--           iters' = iters + 1
+--        in if all nodeIsReset gr'
+--             then (iters', (lowCount', highCount'))
+--             else go iters' (lowCount', highCount') gr'
 
-    nodeIsReset Broadcaster {} = True
-    nodeIsReset (Conjunction st _) = not (or st)
-    nodeIsReset (FlipFlop st _) = not st
+--     nodeIsReset Broadcaster {} = True
+--     nodeIsReset (Conjunction st _) = not (or st)
+--     nodeIsReset (FlipFlop st _) = not st
 
-runButton :: NodeGraph -> ((Int, Int), NodeGraph)
+runButton :: NodeGraph -> ([Signal], NodeGraph)
 runButton initGraph =
   go
-    (0, 0)
     initGraph
     ( Seq.singleton
         Signal
@@ -80,18 +87,10 @@ runButton initGraph =
           }
     )
   where
-    go (lowCount, highCount) gr queue =
-      let (gr', queue') = step gr queue
-          counts' = case queue of
-            signal :<| _ ->
-              -- \| trace (showSignal signal) True ->
-              if signal.level
-                then (lowCount, highCount + 1)
-                else (lowCount + 1, highCount)
-            _ -> (lowCount, highCount)
-       in if null queue'
-            then (counts', gr')
-            else go counts' gr' queue'
+    go gr Seq.Empty = ([], gr)
+    go gr queue@(signal :<| _) =
+      let (signals, finalGraph) = uncurry go (step gr queue)
+       in (signal : signals, finalGraph)
 
 showSignal :: Signal -> String
 showSignal Signal {src, target, level} =
