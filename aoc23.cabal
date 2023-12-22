@@ -5,7 +5,9 @@ author:             Michalis Pardalos
 maintainer:         m.pardalos@gmail.com
 
 common opts
-    default-extensions: TypeApplications ViewPatterns GADTs ImportQualifiedPost OverloadedRecordDot
+    default-extensions:
+      TypeApplications ViewPatterns GADTs ImportQualifiedPost OverloadedRecordDot
+      NoFieldSelectors OverloadedLabels
     default-language: GHC2021
 
 library
@@ -56,6 +58,7 @@ library
       , Day24
       , Day25
       , Util
+      , Data.SparseGrid
 
 executable aoc23
     import: opts
