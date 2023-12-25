@@ -59,3 +59,8 @@ graphvizView dot = do
   (Just hGvIn, _, _, gvProcess) <- createProcess $ (proc "dot" ["-Tx11"]) {std_in = CreatePipe}
   hPutStr hGvIn dot
   return gvProcess
+
+unsafeParse :: Parser a -> ByteString -> a
+unsafeParse parser bs = case parseOnly parser bs of
+  Right r -> r
+  Left e -> error ("Parse failure: " ++ show e)
