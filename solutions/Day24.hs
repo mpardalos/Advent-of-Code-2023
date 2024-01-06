@@ -12,6 +12,8 @@ import Data.Attoparsec.ByteString.Char8
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 qualified as BS
 import Data.Maybe (mapMaybe)
+import Debug.Trace (traceM, traceShowM)
+import Text.Printf (printf)
 import Util (uniquePairs, unsafeParse)
 
 part1 :: ByteString -> Int
@@ -84,6 +86,10 @@ parse = map (unsafeParse hailstoneLine) . BS.lines
           <*> (fromIntegral @Int <$> ("," >> skipSpace >> signed decimal))
 
       return (HailStone {position, velocity})
+
+instance Show HailStone where
+  show HailStone {position = Vec3 x y z, velocity = Vec3 vx vy vz} =
+    printf "%.0f, %.0f, %.0f @ %.0f, %.0f, %.0f" x y z vx vy vz
 
 example1 =
   BS.unlines $
