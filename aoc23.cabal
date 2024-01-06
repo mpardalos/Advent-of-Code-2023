@@ -29,6 +29,9 @@ library
       , hashable
       , parallel
       , process
+      , fgl
+      , graphviz
+      , grid
     hs-source-dirs: solutions
     exposed-modules:  Solutions
     other-modules:
