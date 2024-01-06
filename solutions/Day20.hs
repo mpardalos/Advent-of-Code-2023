@@ -59,6 +59,11 @@ countSignals =
 
 part2 :: ByteString -> ()
 part2 _ = ()
+-- part2 :: ByteString -> Int
+-- part2 input =
+--   let graph = parse input
+--       buttonRuns = unfoldr (Just . runButton) graph
+--    in length (dropWhile (not . any (\Signal {target} -> target == "rx")) buttonRuns)
 
 -- buttonUntilReset :: NodeGraph -> (Int, (Int, Int))
 -- buttonUntilReset initGraph = go 0 (0, 0) initGraph
